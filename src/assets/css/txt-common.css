@@ -1,0 +1,43 @@
+.title-user {
+  font-weight: 500;
+  font-size: 30px;
+}
+.describe-user {
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.title-item {
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.size-icon {
+  font-size: 0px;
+}
+
+.title-size {
+  padding: 15px;
+  font-size: 24px;
+}
+
+.size-describe {
+  padding: 15px;
+  font-size: 16px;
+}
+
+.title-input-item {
+  font-size: 15px;
+}
+
+/* Border */
+
+.bd-input {
+  border-bottom: 1px solid #5e6580;
+}
+.bd-input-top {
+  border-top: 1px solid #5e6580;
+}
+.size-icon-hello {
+  font-size: 40px;
+}

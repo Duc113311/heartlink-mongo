@@ -1,0 +1,27 @@
+.light-theme-bg {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.light-theme-input {
+  background-color: #e2e4f0;
+  border: 1px solid #e2e4f0;
+}
+
+.light-theme-button {
+  background-color: #74809a;
+  border: 1px solid #74809a;
+}
+
+.light-theme-describe {
+  color: #6b708d;
+}
+
+.light-theme-option {
+  background-color: #ffffff;
+  border: 1.5px solid #000000;
+}
+
+.active-border {
+  border: 1.5px solid #ee646a;
+}

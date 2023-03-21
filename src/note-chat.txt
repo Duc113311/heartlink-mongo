@@ -1,0 +1,526 @@
+/* eslint-disable */
+<template>
+<div>
+    <div class="chat">
+        <div class="header">
+            <img @click="showPopup = true" class="back" src="@/assets/images/icon/quay_lai.svg" alt="" />
+            <div class="info">
+                <img :src="userInfo.avatar" alt="img-nguoi-chat" />
+                <p>{{ userInfo.name }}</p>
+                <img class="confirm" :src="userInfo.confirm" alt="1" />
+            </div>
+            <div class="utilities">
+                <img src="../assets/images/icon/ic_video-camera.svg" alt="icon-camera" />
+                <img src="../assets/images/icon/ic_safety.svg" alt="icon-report" />
+            </div>
+        </div>
+
+        <div class="content-chat" ref="chatContainer">
+            <div v-for="(message, index) in messages" :key="index">
+                <div class="content-me" v-if="message.sender === 'user1' && (message.content !== '' || message.url)">
+                    <div class="time">{{ message.timestamp }}</div>
+                    <div v-if="message.url">
+                        <div v-for="(i, index) in message.url" :key="index" class="img_message_me">
+                            <img :src="i" alt="" />
+                        </div>
+                    </div>
+                    <div v-if="message.content !== ''">
+                        <div v-if="message.content !=='👋'" class="message-me">
+                            {{ message.content }}
+                        </div>
+                        <div v-else class="message-wave">
+                            {{ message.content }}
+                        </div>
+                    </div>
+                </div>
+                <div v-if="message.sender === 'user3' && (message.content !== '' || message.url)" class="content-your">
+                    <div class="time">{{ message.timestamp }}</div>
+                    <div style="display:flex">
+                        <img class="avatar_your" :src="userInfo.avatar" alt="" />
+                        <div style="display:colump">
+                        <div v-if="message.url">
+                            <div v-for="(i, index) in message.url" :key="index" class="img_message_you">
+                                <img :src="i" alt="" />
+                            </div>
+                        </div>
+                        <div v-if="message.content !== ''">
+                            <div v-if="message.content !=='👋'" class="message_your">
+                                {{ message.content }}
+                            </div>
+                            <div v-else class="message-wave">
+                                {{ message.content }}
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="false" class="seen">
+                <p v-if="seen">đã xem</p>
+                <p v-else>chưa xem</p>
+            </div>
+        </div>
+        <ImagePreview v-if="link_url.length !== 0" :link_url1="link_url" :images="imageUrl" @updateImage="link_url = $event" />
+
+        <div class="footer">
+            <div class="gif-upload">
+                <!--Phần tải file GIF-->
+                <label for="gif-upload">GIF</label>
+                <input type="file" id="gif-upload" multiple name="gif-upload" ref="fileinput" @change="previewImages($event)" />
+            </div>
+            <div class="chat-input">
+                <input ref="input" type="text" placeholder="Nhập tin nhắn..." v-model="newMessage" @keyup.enter="sendMessage()" />
+                <div class="Emoji">
+                    <div v-if="previewVisible" class="preview-modal" @click="hidePreview">
+                        <picker class="picker" :native="true" :title="My_Emoji_Picker" :emoji="point_up" :emojiSize="21" :perLine="8" @select="handleEmojiSelect" />
+                    </div>
+                    <img style="filter:invert(1)"  @click="showPreview()" src="../assets/images/icon/tongue.png" alt="icon" />
+                </div>
+            </div>
+            <p class="send-btn" @click="hand()">👋</p>
+        </div>
+    </div>
+
+    <div class="seen">
+        <p v-if="seen">đã xem</p>
+        <p v-else>chưa xem</p>
+    </div>
+</div>
+</template>
+
+<script>
+import {
+    Picker
+} from "emoji-mart-vue";
+
+import firebase from "firebase/app";
+import "firebase/database";
+import "firebase/storage";
+
+import ImagePreview from "./preview.vue";
+
+export default {
+    name: "chat",
+    components: {
+        Picker,
+        ImagePreview
+    },
+    data() {
+        return {
+            show_icons: false,
+            newMessage: "",
+            userInfo: {
+                name: "girl friend",
+                avatar: require("@/assets/gai-xinh-mat-moc-1.jpg"),
+                confirm: require("@/assets/images/icon/ic_verified_enable.svg")
+            },
+            messages: {},
+            imageUrl: [],
+            imageUrl_ok: [],
+            main_user: "user1",
+            main_user: "user1",
+            extra_user: "user3",
+            seen: false,
+            link_url: [],
+            show_preview_img: true,
+            previewVisible: false
+        };
+    },
+
+    created() {
+        const db = firebase.database();
+        const ref = db.ref(`chats/${this.main_user}_${this.extra_user}/messages`);
+        ref.on("value", snapshot => {
+            this.messages = snapshot.val();
+        });
+    },
+    updated() {
+        this.scrollToBottom();
+    },
+    methods: {
+        showPreview() {
+            this.previewVisible = true;
+        },
+        hidePreview() {
+            this.previewVisible = false;
+        },
+        previewImages($event) {
+            debugger;
+            const file = $event.target.files;
+            for (let i = 0; i < file.length; i++) {
+                this.link_url.push($event.target.files[i]);
+                let src = URL.createObjectURL($event.target.files[i]);
+                this.imageUrl.push(src);
+            }
+        },
+        async upload_img() {
+            const file = this.link_url;
+            for (let i = 0; i < file.length; i++) {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child("img/" + file[i].name);
+                const snapshot = await imageRef.put(file[i]);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                this.imageUrl_ok.push(downloadURL);
+            }
+        },
+        async hand() {
+            debugger;
+                const db = firebase.database();
+                const ref = db.ref(
+                    `chats/${this.main_user}_${this.extra_user}/messages`
+                );
+
+                let d = new Date();
+                let times = d.toLocaleTimeString() + " " + d.toLocaleDateString();
+
+                let new_messages = {
+                    content: '👋',
+                    sender: this.main_user,
+                    receiver: this.extra_user,
+                    timestamp: times,
+                    url: this.imageUrl_ok,
+                    seen: false
+                };
+
+                ref.push(new_messages);
+                this.newMessage = "";
+                this.imageUrl = [];
+                this.imageUrl_ok = [];
+                this.link_url = [];
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+        },
+        async sendMessage() {
+            debugger;
+            await this.upload_img();
+            if (this.newMessage !== "" || this.imageUrl_ok !== []) {
+                const db = firebase.database();
+                const ref = db.ref(
+                    `chats/${this.main_user}_${this.extra_user}/messages`
+                );
+
+                let d = new Date();
+                let times = d.toLocaleTimeString() + " " + d.toLocaleDateString();
+
+                let new_messages = {
+                    content: this.newMessage,
+                    sender: this.main_user,
+                    receiver: this.extra_user,
+                    timestamp: times,
+                    url: this.imageUrl_ok,
+                    seen: false
+                };
+
+                ref.push(new_messages);
+                this.newMessage = "";
+                this.imageUrl = [];
+                this.imageUrl_ok = [];
+                this.link_url = [];
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            }
+        },
+
+        scrollToBottom() {
+            this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
+        },
+        handleEmojiSelect(emoji) {
+            this.newMessage += emoji.native;
+        },
+        input_focus() {
+            this.show_icons = !this.show_icons;
+            this.$refs.input.focus();
+        }
+    }
+};
+</script>
+
+<style scoped>
+@import url("https://fonts.googleapis.com/css?family=Roboto+Condensed");
+
+.chat {
+    width: 500px;
+    height: 932px;
+    margin: 20px auto;
+    /* căn giữa và cách viền 20px */
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    background-color: #242a38;
+    color: white;
+    font-family: "Roboto", sans-serif;
+}
+
+.Emoji img {
+    padding-top: 5px;
+    width: 30px;
+    height: 30px;
+}
+
+.picker {
+    margin-top: 50px;
+}
+
+.content-chat {
+    height: 80%;
+    padding: 20px;
+    padding-top: 10px;
+    font-size: 30px;
+    overflow: auto;
+    scrollbar-width: none;
+    /* Ẩn thanh cuộn mặc định trên Firefox */
+    -ms-overflow-style: none;
+    /* Ẩn thanh cuộn mặc định trên IE/Edge */
+}
+
+.content-chat::-webkit-scrollbar {
+    width: 0px;
+    /* Ẩn thanh cuộn mặc định trên Chrome/Safari */
+    height: 0px;
+}
+
+.content-me {
+    margin-top: 20px;
+    padding: 10px;
+    margin-left: auto;
+    width: 50%;
+}
+.message-wave{
+    margin-top: 20px;
+    text-align: right;
+    font-size: 60px;
+}
+.message-me {
+    background-color: #fd5d65;
+    border-radius: 20px 0px 20px 20px;
+    word-wrap: break-word;
+    margin-top: 20px;
+    padding: 10px;
+    
+}
+
+.img_message_me img {
+    width: 100%;
+}
+
+.img_message_you {
+    width: 70%;
+    margin-top: 20px;
+    padding: 10px;
+    margin-right: auto;
+    display: inline-block;
+}
+
+.img_message_you img {
+    width: 100%;
+}
+
+.content-your {
+    margin-top: 20px;
+    padding: 10px;
+    margin-right: auto;
+    width: 60%;
+}
+
+.time {
+    margin-top: 20px;
+    font-size: 15px;
+    color: #757a8d;
+    text-align: center;
+}
+
+.message_your {
+    width: 100%;
+    background-color: white;
+    border-radius: 0px 20px 20px 20px;
+    margin-top: 20px;
+    padding: 10px;
+    margin-right: auto;
+    word-wrap: break-word;
+    color: black;
+    display: inline-block;
+}
+
+.avatar_your {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+/* CSS cho phần đầu */
+.header {
+    display: flex;
+    /* Thêm thuộc tính hiển thị flex để các phần tử con trong header có thể dễ dàng được căn chỉnh */
+    align-items: center;
+    /* Căn giữa các phần tử theo chiều dọc */
+    padding: 10px;
+    /* Thêm phần đệm giữa nội dung và khung của header */
+    border-bottom: 1px solid #3c3f50;
+    /* Thêm đường viền dưới cùng cho header */
+    height: 8%;
+}
+
+.header img {
+    cursor: pointer;
+    /* Thêm hiệu ứng con trỏ tay khi di chuột qua các ảnh */
+}
+
+.info {
+    display: flex;
+    /* Thêm hiển thị flex để nội dung bên trong có thể được căn giữa dễ dàng */
+    align-items: center;
+    /* Căn giữa các phần tử theo chiều dọc */
+    margin: 0 20px;
+    /* Thêm phần đệm giữa các phần tử trong info */
+}
+
+.info img {
+    width: 50px;
+    /* Thêm kích thước cho ảnh của người dùng */
+    height: 50px;
+    border-radius: 50%;
+    /* Thêm đường viền bo tròn cho ảnh người dùng */
+    object-fit: cover;
+    /* Thêm thuộc tính đối tượng đặt vị trí để ảnh người dùng tràn đầy khung hình */
+    margin-right: 10px;
+    /* Thêm phần đệm giữa ảnh người dùng và văn bản */
+}
+
+.info p {
+    font-size: 22px;
+    /* Thêm kích thước font chữ cho tên người dùng */
+    font-weight: bold;
+    /* Thêm độ dày font chữ cho tên người dùng */
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.info .confirm {
+    width: 30px;
+    height: 30px;
+}
+
+.utilities {
+    display: flex;
+    /* Thêm hiển thị flex để nội dung bên trong có thể được căn giữa dễ dàng */
+    align-items: center;
+    /* Căn giữa các phần tử theo chiều dọc */
+    margin-left: auto;
+    /*vị trí cuối cùng bên phải */
+}
+
+.utilities img {
+    width: 30px;
+    /* Thêm kích thước cho các biểu tượng tiện ích */
+    height: 30px;
+    margin-left: 10px;
+    /* Thêm phần đệm giữa các biểu tượng tiện ích */
+    cursor: pointer;
+    /* Thêm hiệu ứng con trỏ tay khi di chuột qua các biểu tượng tiện ích */
+    padding-left: 15px;
+}
+
+.image-preview {
+    width: 100%;
+    height: 160px;
+    border: 1px solid #ccc;
+    display: flex;
+    overflow: auto;
+    scrollbar-width: none;
+    /* Ẩn thanh cuộn mặc định trên Firefox */
+    -ms-overflow-style: none;
+    /* Ẩn thanh cuộn mặc định trên IE/Edge */
+}
+
+.image-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    height: 120px;
+    overflow: hidden;
+    border: 2px dashed #8d5e7a;
+    border-radius: 10px;
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    height: 10%;
+}
+
+.gif-upload {
+    margin-right: 10px;
+}
+
+.gif-upload label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    width: 32px;
+    padding: 10px 10px;
+    background-color: #3c3f50;
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.gif-upload input[type="file"] {
+    display: none;
+}
+
+.preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding-bottom: 10px;
+}
+
+.chat-input {
+    height: 40px;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 30px;
+    background-color: #3c3f50;
+    padding: 5px 10px;
+    margin-right: 10px;
+}
+
+.chat-input input[type="text"] {
+    flex-grow: 1;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    font-size: 20px;
+    margin-right: 10px;
+    color: white;
+    padding: 10px;
+}
+
+.send-btn {
+    font-size: 40px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+}
+
+.back {
+    width: 40px;
+    height: 25px;
+}
+
+</style>
