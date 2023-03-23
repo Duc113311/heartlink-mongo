@@ -1,0 +1,27 @@
+.dark-theme-bg {
+  background-color: #242a38;
+  color: #ffffff;
+}
+
+.dark-theme-input {
+  background-color: #495063;
+  border: 1px solid #495063;
+}
+
+.dark-theme-button {
+  background-color: #3a3f52;
+  border: 1px solid #3a3f52;
+}
+
+.dark-theme-describe {
+  color: #727993;
+}
+
+.dark-theme-option {
+  background-color: #242a38;
+  border: 1.5px solid #ffffff;
+}
+
+.dark-theme-check {
+  background-color: #202430;
+}
