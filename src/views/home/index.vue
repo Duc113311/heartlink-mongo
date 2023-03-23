@@ -33,7 +33,7 @@
 
     <!-- Hiển thị form chat khi cả 2 user match -->
     <div
-      v-if="!isShowMatchs"
+      v-if="isShowMatchs"
       class="w-full h-full match-like z-20 absolute top-0 left-0"
     >
       <FormLikeToo @onHideLikeYou="onHideLikeYou"></FormLikeToo>

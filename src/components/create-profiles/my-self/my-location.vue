@@ -86,6 +86,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 import BhLocation from "../../bh-element-ui/button/bh-location";
 import AvoidSomeone from "../../welcome/avoid-someone";
 export default {
@@ -123,8 +124,14 @@ export default {
   },
 
   methods: {
-    onShowAvoid(value) {
+    ...mapActions(["loginAppByAuthId"]),
+    async onShowAvoid(value) {
       this.isShowAvoid = value;
+      const userId = localStorage.oAuth2Id;
+      const oAuth = {
+        oAuth2Id: userId,
+      };
+      await this.loginAppByAuthId(oAuth);
     },
     async onHideWellcome(val) {
       this.$router.push({ path: "/home" });

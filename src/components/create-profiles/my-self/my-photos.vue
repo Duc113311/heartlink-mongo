@@ -183,7 +183,7 @@ export default {
           this.dialogImageUrl = url;
           const dataImage = {
             id: idUrl,
-            url: url,
+            urlName: url,
           };
           this.setPhotos(dataImage);
           // Or inserted into an <img> element

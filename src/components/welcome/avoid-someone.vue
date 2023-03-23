@@ -100,12 +100,14 @@ export default {
     };
 
     await this.getAllListUserProfile(paramUser);
+
+    await this.getListCardForUser();
   },
 
   mounted() {},
 
   methods: {
-    ...mapActions(["getAllListUserProfile"]),
+    ...mapActions(["getAllListUserProfile", "getListCardForUser"]),
     onCloseDialog() {
       this.$router.push({ path: "/home-new" });
 

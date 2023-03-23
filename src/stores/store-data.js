@@ -8,6 +8,7 @@ import commonModule from "./common/store-common";
 import likeTopicModule from "./like-topic/store-like-topic";
 import messageModule from "./message/store-message";
 import homeModule from "./home/store-home";
+import mongoModule from "./mongo/store-mongo";
 
 Vue.use(Vuex);
 
@@ -25,5 +26,6 @@ export default new Vuex.Store({
     likeTopicModule,
     messageModule,
     homeModule,
+    mongoModule,
   },
 });

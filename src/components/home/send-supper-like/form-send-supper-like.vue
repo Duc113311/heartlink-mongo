@@ -28,9 +28,7 @@
           </div>
 
           <div class="flex justify-center items-center mb-2">
-            <BhSendSuperLike
-              @onSendSuperLike="onSendSuperLike"
-            ></BhSendSuperLike>
+            <BhSendSuperLike></BhSendSuperLike>
           </div>
           <div class="flex justify-center items-center">
             <BhNothank :nameTitle="nameNothank"></BhNothank>

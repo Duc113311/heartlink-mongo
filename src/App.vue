@@ -51,7 +51,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(["checkExistUserId"]),
+    ...mapActions(["checkExistUserId", "getListCardForUser"]),
     ...mapMutations(["setLocation"]),
     async showPosition(position) {
       if (position.coords) {
@@ -69,12 +69,12 @@ export default {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(this.showPosition);
     }
-    const userId = localStorage.getItem("userId");
-    await this.checkExistUserId(userId);
 
-    const isExist = this.$store.state.loginModule.isExistUserId;
-
-    if (isExist) {
+    const tokenId = localStorage.tokenId;
+    const oAuth2Id = localStorage.oAuth2Id;
+    debugger;
+    if (tokenId !== undefined && oAuth2Id !== undefined) {
+      await this.getListCardForUser();
       this.$router.push({ path: "/home-new" });
     } else {
       this.$router.push({ name: "login-page" }).catch(() => {});

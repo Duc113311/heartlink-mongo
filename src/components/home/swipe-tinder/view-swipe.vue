@@ -3,7 +3,7 @@
     <Tinder
       class="uis"
       ref="tinder"
-      key-name="userId"
+      key-name="oAuth2Id"
       :queue.sync="listDataUser"
       :offset-y="10"
       @submit="onSubmit"
@@ -13,7 +13,7 @@
           v-show="isActiveImag"
           class="pic z-8"
           :style="{
-            'background-image': `url(${scope.data.avatars[0].urlName})`,
+            'background-image': `url(${scope.data?.profiles?.avatars[0]})`,
           }"
         />
         <div
@@ -28,7 +28,7 @@
           class="flex w-full justify-center absolute top-0 content-center p-0.5 border-solid mt-3"
         >
           <button
-            v-for="data in scope.data.avatars"
+            v-for="data in scope.data?.profiles.avatars"
             :key="data.id"
             :id="data.id"
             :class="data.id === 0 ? 'active-image' : 'no-active'"
@@ -42,15 +42,15 @@
             <div class="w-70">
               <div class="flex items-center font-title">
                 <div
-                  :title="scope.data.firstName"
+                  :title="scope.data.fullname"
                   class="text-ellipsis w-52 whitespace-nowrap overflow-hidden"
                 >
-                  {{ scope.data.firstName }},
+                  {{ scope.data.fullname }},
                 </div>
-                <div class="mr-3">{{ scope.data.age }}</div>
+                <div class="mr-3">{{ scope.data?.age }}</div>
                 <div
                   class="flex justify-center items-center cursor-pointer"
-                  @click="onDetailInfor(scope.data?.userId)"
+                  @click="onDetailInfor(scope.data?.profiles)"
                 >
                   <i class="fa-solid fa-circle-info text-xl"></i>
                 </div>
@@ -62,7 +62,8 @@
                   <i class="fa-solid fa-location-dot"></i>
                 </div>
                 <span class="font-describe">
-                  {{ scope.data?.locations }} km away</span
+                  {{ scope.data?.locations ? scope.data?.locations : 1 }} km
+                  away</span
                 >
               </div>
             </div>
@@ -72,18 +73,18 @@
                 src="@/assets/icon/bt_like_count.svg"
                 width="70"
               />
-              <span class="h-complete">{{ scope.data.complete }}</span>
+              <span class="h-complete">{{ scope.data?.complete }}</span>
             </div>
           </div>
         </div>
         <div class="w-full flex absolute top-0 opacity-0 h-4/6 nextBg">
           <div
             class="w-2/4 bg-slate-500"
-            @click="nextImageLeft(scope.data.avatars, scope.data.userId)"
+            @click="nextImageLeft(scope.data?.avatars, scope.data?.userId)"
           ></div>
           <div
             class="w-2/4 bg-orange-200"
-            @click="nextImageRight(scope.data.avatars, scope.data.userId)"
+            @click="nextImageRight(scope.data?.avatars, scope.data?.userId)"
           ></div>
         </div>
       </template>
@@ -138,9 +139,9 @@ export default {
 
     listDataUser() {
       debugger;
-      return this.$store.state.userModule.userProfileList
-        ? this.$store.state.userModule.userProfileList
-        : [];
+      const dataUser = this.$store.state.mongoModule.listDataCard;
+      console.log(dataUser);
+      return dataUser ? dataUser : [];
     },
 
     isShowUrl(val) {
@@ -148,7 +149,7 @@ export default {
     },
 
     idImage() {
-      return this.$store.state.userModule.urlAvatarUser.urlName;
+      return this.$store.state.userModule?.urlAvatarUser?.urlName;
     },
   },
 

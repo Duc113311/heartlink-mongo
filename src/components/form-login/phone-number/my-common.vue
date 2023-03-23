@@ -71,7 +71,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(["postTokenByUserID", "checkExistUserId"]),
+    ...mapActions(["postTokenByUserID", "loginAppByAuthId"]),
 
     ...mapMutations(["setTokenAccount"]),
     validateRequire(value) {
@@ -179,10 +179,13 @@ export default {
           });
           console.log(userID, providerId);
 
-          await this.checkExistUserId(userID);
-          const isExist = this.$store.state.loginModule.isExistUserId;
+          const oAuth = {
+            oAuth2Id: userID,
+          };
+          await this.loginAppByAuthId(oAuth);
+          const tokenId = this.$store.state.mongoModule.tokenId;
           debugger;
-          if (isExist) {
+          if (tokenId) {
             this.$router.push({ path: "/home-new" }).catch(() => {});
           } else {
             this.$emit("onShowEmailUser", true);

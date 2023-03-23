@@ -39,7 +39,7 @@ export default {
 
   methods: {
     ...mapMutations(["setLocation"]),
-    ...mapActions(["postInforUserProfile"]),
+    ...mapActions(["registerUserByAuthId"]),
 
     async onHideWellcome(val) {
       this.isShowAvoid = val;
@@ -52,15 +52,46 @@ export default {
       }
 
       debugger;
+      const images = [];
       const userId = TokenApps.getAccessToken("userId");
       const providerId = TokenApps.getProviderId("providerId");
       const dataUser = this.$store.state.userModule.user_profile;
-      dataUser.birthday = new Date(dataUser.birthday.toString()).getTime();
+      // dataUser.birthday = new Date(dataUser.birthday.toString()).getTime();
+      for (let index = 0; index < dataUser.avatars.length; index++) {
+        const element = dataUser.avatars[index];
 
+        images.push(element.url);
+      }
+      if (parseInt(dataUser.gender) === 1) {
+        dataUser.gender = "men";
+      } else {
+        dataUser.gender = "women";
+      }
+      debugger;
       dataUser.providerId = providerId;
       dataUser.userId = userId;
-      await this.postInforUserProfile(dataUser);
 
+      const objectUser = {
+        oAuth2Id: userId,
+        fullname: dataUser.firstName,
+        dob: dataUser.birthday,
+        gender: dataUser.gender,
+        address: "Thai Thinh, Hà Noi",
+        location: {
+          lat: dataUser.latitude,
+          long: dataUser.longitude,
+        },
+        genderShowMe: dataUser.showMeGender,
+        university: "Dai Hoc",
+        avatars: images,
+        orientationSexuals: dataUser.sexuals,
+        interests: dataUser.interests,
+        showGender: true,
+        showSexual: true,
+      };
+
+      await this.registerUserByAuthId(objectUser);
+      localStorage.setItem("oAuth2Id", userId);
       // await this.postInforUserProfile(dataUser);
       this.$emit("onShowAvoid", true);
     },
